@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev src/index.ts",
-    "build": "tsc --noEmit"
+    "dev": "tsx watch src/index.ts",
+    "build": "echo 'No build step needed for Vercel'"
   },
   "keywords": [],
   "author": "",
