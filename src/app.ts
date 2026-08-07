@@ -5,9 +5,7 @@ import registerRoutes from './registerRoutes';
 import { registerErrorHandler } from './middleware/errorMiddlware';
 import { cns } from './utils/extra';
 
-export const app = Fastify({
-  logger: false,
-});
+const app = Fastify({ logger: true });
 
 app.register(cors, {
   origin: '*',
@@ -29,3 +27,4 @@ app.addHook('preHandler', async (request) => {
 app.register(registerRoutes, { prefix: '/api' });
 
 registerErrorHandler(app);
+export default app;
