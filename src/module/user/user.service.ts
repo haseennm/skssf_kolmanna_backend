@@ -223,17 +223,16 @@ export default class UserService {
   // Authenticate user & issue session JWT Token
   async login(data: LoginBody) {
     const { username, email, password } = data;
-
+    const logincred = username || email
     // Search user by email or username
     const userResult = await query<any>(
-      `SELECT * FROM "user" WHERE username = $1 OR email = $2`,
-      [username || null, email || null]
+      `SELECT * FROM "user"  WHERE username = $1 OR LOWER(email) = LOWER($1)`,
+      [logincred]
     );
 
     const user = userResult[0];
-
     if (!user) {
-      throw new AppError("Invalid login credentials provided.", 401);
+      throw new AppError("Invalid login credentials (user name , email) provided.", 401);
     }
 
     // Verify Password match using auth utility

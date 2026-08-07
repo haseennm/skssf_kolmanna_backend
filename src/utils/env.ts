@@ -11,4 +11,5 @@ export const env = {
   DB_NAME: process.env.DB_NAME,
   JWT_SEC: process.env.JWT_SEC,
   ENCRIPTION_KEY: process.env.encryption_key,
+  SUPABASE_CONNECTION_URL: process.env.SUPABASE_CONNECTION_URL,
 }

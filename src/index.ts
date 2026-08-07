@@ -4,6 +4,7 @@ import { env } from './utils/env'
 import registerRoutes from './registerRoutes';
 import { registerErrorHandler } from './middleware/errorMiddlware';
 import { cns } from './utils/extra';
+import fastifyRateLimit from '@fastify/rate-limit';
 
 const app = Fastify({
     logger: false,
@@ -16,6 +17,10 @@ app.register(cors, {
     allowedHeaders: ['Content-Type', 'Authorization']
 
 });
+app.register(fastifyRateLimit, {
+  max: 100,
+  timeWindow: '1 minute',
+})
 
 app.addHook('preHandler', async (request, reply) => {
     cns(request.url, request.body as object)

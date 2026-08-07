@@ -159,6 +159,7 @@ export async function validateUserRole({
   role: string | string[];
   client?: PoolClient;
 }): Promise<void> {
+  console.log(action_by,role)
   if (!action_by) {
     throw new AppError("Action by user is required.", 400);
   }

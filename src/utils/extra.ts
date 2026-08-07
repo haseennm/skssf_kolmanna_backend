@@ -24,6 +24,9 @@ export const STATUS_MAP = {
   7: 'Damaged',
   8: 'Miss',
   9: 'Soon',
+  10: 'Issued',
+  11: 'Returned',
+  12: 'Available',
 } as const
 export const STATUS_REVERSE_MAP = Object.fromEntries(
   Object.entries(STATUS_MAP).map(([key, value]) => [
@@ -124,7 +127,8 @@ export const ROLE_MAP: Record<string, number> = {
   "program handle": 2,
   "stock handle": 3,
   "all handle": 4,
-  "user handle": 5
+  "user handle": 5,
+  "sahachari handle": 6
 };
 
 export const REVERSE_ROLE_MAP: Record<number, string> = {
@@ -132,7 +136,8 @@ export const REVERSE_ROLE_MAP: Record<number, string> = {
   2: "program handle",
   3: "stock handle",
   4: "all handle",
-  5: "user handle"
+  5: "user handle",
+  6: "sahachari handle",
 };
 
 export function mapRolesToNumbers(roles: string[]): number[] {

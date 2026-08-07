@@ -19,7 +19,7 @@ export async function userRouter(app: FastifyInstance) {
       schema: {
         body: {
           type: "object",
-          required: ["name", "username", "email", "password", "role", "active_year_id","action_by"],
+          required: ["name", "username", "email", "password", "role", "active_year_id", "action_by"],
           properties: {
             name: { type: "string", minLength: 2, maxLength: 100 },
             address: { type: ["string", "null"] },
@@ -34,7 +34,7 @@ export async function userRouter(app: FastifyInstance) {
               minItems: 1,
               items: {
                 type: "string",
-                enum: ["ledger handle", "program handle", "stock handle", "all handle"]
+                enum: ["ledger handle", "program handle", "stock handle", "all handle", "sahachari handle"]
               }
             }
           }
@@ -57,10 +57,12 @@ export async function userRouter(app: FastifyInstance) {
       schema: {
         body: {
           type: "object",
+          required: ["action_by"],
           properties: {
             page: { type: "number", minimum: 1 },
             limit: { type: "number", minimum: 1 },
             id: { type: "number" },
+            action_by: { type: ["number", "string"] },
             active_year_id: { type: "number" },
             search: { type: ["string", "null"] }
           }
@@ -90,7 +92,7 @@ export async function userRouter(app: FastifyInstance) {
       schema: {
         body: {
           type: "object",
-          required: ["id", "active_year_id","action_by"],
+          required: ["id", "active_year_id", "action_by"],
           properties: {
             id: { type: "number" },
             active_year_id: { type: "number" },
@@ -105,7 +107,7 @@ export async function userRouter(app: FastifyInstance) {
               type: "array",
               items: {
                 type: "string",
-                enum: ["ledger handle", "program handle", "stock handle", "all handle"]
+                enum: ["ledger handle", "program handle", "stock handle", "all handle", "sahachari handle"]
               }
             }
           }
@@ -127,7 +129,7 @@ export async function userRouter(app: FastifyInstance) {
       schema: {
         body: {
           type: "object",
-          required: ["r_id", "active_year_id","action_by"],
+          required: ["r_id", "active_year_id", "action_by"],
           properties: {
             r_id: { type: "number" },
             active_year_id: { type: "number" },
@@ -179,7 +181,7 @@ export async function userRouter(app: FastifyInstance) {
       schema: {
         body: {
           type: "object",
-          required: ["user_id","action_by"],
+          required: ["user_id", "action_by"],
           properties: {
             user_id: { type: "number" },
             action_by: { type: "number" }

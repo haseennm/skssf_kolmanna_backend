@@ -6,6 +6,7 @@ import {
   CreateUserBody,
   DeleteUserBody,
   EditUserBody,
+  FetchUserParams,
   LoginBody,
   MovetoCurrentActiveYear
 } from "./user.types";
@@ -37,9 +38,16 @@ export default class UserController {
     });
   }
 
-  async fetchUser(data: any) {
-    const users = await this.service.fetchUser(data);
-    return users;
+  async fetchUser(data: FetchUserParams) {
+    return transaction(async (client) => {
+      await validateUserRole({
+        action_by: data.filters.action_by,
+        role: ["all handle"],
+        client: client
+      })
+      const users = await this.service.fetchUser(data);
+      return users;
+    })
   }
 
   async editUser(data: EditUserBody) {
@@ -69,7 +77,7 @@ export default class UserController {
 
   async deleteUser(data: DeleteUserBody) {
     return transaction(async (client) => {
-     await validateActiveYearAndRole({
+      await validateActiveYearAndRole({
         action_by: data.action_by,
         active_year_id: data.active_year_id,
         role: ["all handle", "user handle"],

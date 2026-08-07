@@ -13,6 +13,7 @@ export interface CreateUserBody {
 }
 
 export interface FetchUserBody {
+  action_by: number | string;
   id?: number;
   active_year_id?: number;
   search?: string | null;
@@ -59,6 +60,6 @@ export interface LoginBody {
   password: string;
 }
 export interface MovetoCurrentActiveYear {
-  user_id:number;
+  user_id: number;
   action_by: number;
 }

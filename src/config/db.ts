@@ -2,11 +2,10 @@ import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg'
 import { env } from '../utils/env'
 
 export const pool = new Pool({
-  host: env.DB_HOST,
-  port: Number(env.DB_PORT),
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  database: env.DB_NAME,
+  connectionString: env.SUPABASE_CONNECTION_URL,
+  ssl: {
+    rejectUnauthorized: false, // Required by Supabase for external connections
+  },
 })
 
 pool.on('connect', () => {
