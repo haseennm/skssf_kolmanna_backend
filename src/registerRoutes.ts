@@ -10,6 +10,7 @@ import { lostStockRouter } from './module/lostStock/lostStock.router'
 import { sahachariUserRouter } from './module/sahachari/sahachariUsers/sahachariUser.router'
 import { sahachariItemRouter } from './module/sahachari/sahachariItems/sahachariItem.router'
 import { sahachariIssuesRouter } from './module/sahachari/sahachariUses/sahachari.router'
+import { otpRouter } from './module/otp/otp.router'
 
 
 export default async function registerRoutes(app: FastifyInstance) {
@@ -24,5 +25,6 @@ export default async function registerRoutes(app: FastifyInstance) {
   app.register(sahachariUserRouter, { prefix: '/sahachari/user' })
   app.register(sahachariItemRouter, { prefix: '/sahachari/item' })
   app.register(sahachariIssuesRouter, { prefix: '/sahachari/issues' })
-  
+  app.register(otpRouter, { prefix: '/otp' })
+
 }

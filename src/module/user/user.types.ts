@@ -5,7 +5,6 @@ export interface CreateUserBody {
   address?: string | null;
   username: string;
   email: string;
-  phone_number?: string | null;
   password: string;
   role: string[]; // Accepts ["ledger handle", "program handle"]
   active_year_id: number;
@@ -42,12 +41,19 @@ export interface EditUserBody {
   address?: string | null;
   username?: string;
   email?: string;
-  phone_number?: string | null;
   password?: string;
   role?: string[];
-  action_by: number | string
+  action_by: number | string;
+  self_edit?: boolean
 }
 
+export interface ChangePassword {
+  email: number | string;
+  password: string;
+}
+export interface ChangePasswordUserRequestBody {
+  email: string;
+}
 export interface DeleteUserBody {
   r_id: number;
   active_year_id: number;
@@ -62,4 +68,8 @@ export interface LoginBody {
 export interface MovetoCurrentActiveYear {
   user_id: number;
   action_by: number;
+}
+export interface VerifyOTPPayload {
+    email: string;
+    otp: string;
 }

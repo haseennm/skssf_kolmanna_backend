@@ -1,14 +1,18 @@
 import { transaction } from "../../config/db";
 import { validateActiveYearAndRole, validateUserRole } from "../../middleware/authCheck";
 import { AppError } from "../../utils/AppError";
+import { OTPController } from "../otp/otp.controller";
 import UserService from "./user.service";
 import {
+  ChangePassword,
+  ChangePasswordUserRequestBody,
   CreateUserBody,
   DeleteUserBody,
   EditUserBody,
   FetchUserParams,
   LoginBody,
-  MovetoCurrentActiveYear
+  MovetoCurrentActiveYear,
+  VerifyOTPPayload
 } from "./user.types";
 
 export default class UserController {
@@ -52,25 +56,33 @@ export default class UserController {
 
   async editUser(data: EditUserBody) {
     return transaction(async (client) => {
-      if (data.role?.includes("all handle")) {
-        await validateActiveYearAndRole({
-          action_by: data.action_by,
-          active_year_id: data.active_year_id,
-          role: ["all handle"],
-          client: client,
-          inputDate: undefined
-        })
-      } else {
-
-        await validateActiveYearAndRole({
-          action_by: data.action_by,
-          active_year_id: data.active_year_id,
-          role: ["all handle", "user handle"],
-          client: client,
-          inputDate: undefined
-        })
+      if (data.self_edit !== true) {
+        if (data.role?.includes("all handle")) {
+          await validateActiveYearAndRole({
+            action_by: data.action_by,
+            active_year_id: data.active_year_id,
+            role: ["all handle"],
+            client: client,
+            inputDate: undefined
+          })
+        } else {
+          await validateActiveYearAndRole({
+            action_by: data.action_by,
+            active_year_id: data.active_year_id,
+            role: ["all handle", "user handle"],
+            client: client,
+            inputDate: undefined
+          })
+        }
       }
       const result = await this.service.updateUser(data, client);
+      return result;
+    });
+  }
+  async editUserPassword(data: ChangePassword) {
+    return transaction(async (client) => {
+
+      const result = await this.service.updateUserPassword(data, client);
       return result;
     });
   }
@@ -85,6 +97,23 @@ export default class UserController {
         inputDate: undefined
       })
       const user = await this.service.deleteUser(data, client);
+      return user;
+    });
+  }
+  async changePasswordReq(data: ChangePasswordUserRequestBody) {
+    return transaction(async (client) => {
+      const user = await this.service.checkUserExist(data, client);
+      const otpController = new OTPController()
+      await otpController.createOTP(user.id, client)
+      return user;
+    });
+  }
+  async verifyOtp(data: VerifyOTPPayload) {
+    const {email,otp}=data
+    return transaction(async (client) => {
+      const user = await this.service.checkUserExist({ email }, client);
+      const otpController = new OTPController()
+      await otpController.verifyOTP(user.id,otp, client)
       return user;
     });
   }

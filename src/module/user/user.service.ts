@@ -16,14 +16,16 @@ import {
   FetchDbUser,
   EditUserBody,
   LoginBody,
-  MovetoCurrentActiveYear
+  MovetoCurrentActiveYear,
+  ChangePasswordUserRequestBody,
+  ChangePassword
 } from "./user.types";
 
 export default class UserService {
 
-  // Create User
+
   async createUser(data: CreateUserBody, client: PoolClient) {
-    const { name, address, username, email, phone_number, password, role, active_year_id } = data;
+    const { name, address, username, email, password, role, active_year_id } = data;
 
     // Unique checks for Email and Username
     const isUnique = await executeInTransaction(client,
@@ -47,13 +49,12 @@ export default class UserService {
           address,
           username,
           email,
-          phone_number,
           password,
           role,
           active_year_id
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7::int[], $8)
-        RETURNING id, name, address, username, email, phone_number, role, active_year_id;
+        VALUES ($1, $2, $3, $4, $5, $6::int[], $8)
+        RETURNING id, name, address, username, email, role, active_year_id;
       `;
 
     const values = [
@@ -61,7 +62,6 @@ export default class UserService {
       address ?? null,
       username,
       email,
-      phone_number ?? null,
       hashedPassword,
       numericRoles,
       active_year_id
@@ -104,7 +104,7 @@ export default class UserService {
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
     const userQuery = `
-      SELECT id, name, address, email, phone_number, role, active_year_id
+      SELECT id, name, address, email, role, active_year_id
       FROM "user"
       ${whereClause}
       ORDER BY name ASC
@@ -144,7 +144,7 @@ export default class UserService {
 
   // Update User profile
   async updateUser(data: EditUserBody, client: any) {
-    const { id, active_year_id, name, address, username, email, phone_number, password, role } = data;
+    const { id, active_year_id, name, address, username, email, password, role } = data;
 
     // Validate user existence
     const existingUser = await getRecord(id, '"user"', active_year_id, client);
@@ -171,11 +171,10 @@ export default class UserService {
           address = $2,
           username = $3,
           email = $4,
-          phone_number = $5,
-          password = $6,
-          role = $7::int[]
-        WHERE id = $8 AND active_year_id = $9
-        RETURNING id, name, address, username, email, phone_number, role, active_year_id;
+          password = $5,
+          role = $6::int[]
+        WHERE id = $7 AND active_year_id = $8
+        RETURNING id, name, address, username, email, role, active_year_id;
       `;
 
     const values = [
@@ -183,7 +182,6 @@ export default class UserService {
       address !== undefined ? address : existingUser.address,
       username ?? existingUser.username,
       email ?? existingUser.email,
-      phone_number !== undefined ? phone_number : existingUser.phone_number,
       finalPassword,
       finalRoles,
       id,
@@ -199,6 +197,66 @@ export default class UserService {
         role: mapNumbersToRoles(updatedUser.role)
       }
     };
+  };
+  async updateUserPassword(data: ChangePassword, client: any) {
+    const { email, password } = data;
+
+    // Validate user existence
+    const existingUser = await executeInTransaction(client,`SELECT FROM "user" WHERE email =$1`,[email])
+    if (!existingUser) {
+      throw new AppError("User not found.", 404);
+    }
+
+    // Hash password if updating it
+    let finalPassword = existingUser.rows[0].password;
+    if (password) {
+      finalPassword = await hashPassword(password);
+    }
+
+
+    const queryText = `
+        UPDATE "user"
+        SET
+          password = $1
+        WHERE email = $2
+        RETURNING id, name, address, username, email, role, active_year_id;
+      `;
+
+    const values = [
+      finalPassword,
+      email
+    ];
+
+    const { rows } = await executeInTransaction(client, queryText, values);
+    const updatedUser = rows[0];
+
+    return {
+      data: {
+        ...updatedUser,
+        role: mapNumbersToRoles(updatedUser.role)
+      }
+    };
+  };
+  async checkUserExist(data: ChangePasswordUserRequestBody, client: any) {
+    const {  email } = data;
+
+    // Validate user existence
+    const existingUser = await executeInTransaction(client,`SELECT * FROM "user" WHERE email =$1`,[email])
+    // const existingUser = await getRecord(r_id, '"user"', active_year_id, client);
+    if (!existingUser.rows[0]) {
+      throw new AppError(
+        "Email not found.",
+        404
+      );
+    }
+
+    if (existingUser.rows[0].email !== email) {
+      throw new AppError(
+        "The provided email address does not match the user.",
+        400
+      );
+    }
+    return existingUser.rows[0]
   };
 
 

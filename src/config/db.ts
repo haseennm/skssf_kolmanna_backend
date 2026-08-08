@@ -7,6 +7,13 @@ export const pool = new Pool({
     rejectUnauthorized: false, // Required by Supabase for external connections
   },
 })
+// export const pool = new Pool({
+//   host: env.DB_HOST,
+//   port: Number(env.DB_PORT),
+//   user: env.DB_USER,
+//   password: env.DB_PASSWORD,
+//   database: env.DB_NAME,
+// })
 
 pool.on('connect', () => {
   console.log('\x1b[42m\x1b[37mConnected to PostgreSQL\x1b[0m')

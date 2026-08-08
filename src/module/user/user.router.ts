@@ -6,7 +6,10 @@ import {
   EditUserBody,
   DeleteUserBody,
   LoginBody,
-  MovetoCurrentActiveYear
+  MovetoCurrentActiveYear,
+  ChangePasswordUserRequestBody,
+  ChangePassword,
+  VerifyOTPPayload
 } from "./user.types";
 
 export async function userRouter(app: FastifyInstance) {
@@ -26,7 +29,6 @@ export async function userRouter(app: FastifyInstance) {
             username: { type: "string", minLength: 3, maxLength: 50 },
             email: { type: "string", format: "email" },
             action_by: { type: ["string", "number"] },
-            phone_number: { type: ["string", "null"] },
             password: { type: "string", minLength: 6 },
             active_year_id: { type: "number" },
             role: {
@@ -100,9 +102,9 @@ export async function userRouter(app: FastifyInstance) {
             address: { type: ["string", "null"] },
             username: { type: "string", minLength: 3 },
             email: { type: "string", format: "email" },
-            phone_number: { type: ["string", "null"] },
             password: { type: "string", minLength: 6 },
             action_by: { type: ["string", "number"] },
+            self_edit: { type: ["boolean", "null"] },
             role: {
               type: "array",
               items: {
@@ -195,6 +197,114 @@ export async function userRouter(app: FastifyInstance) {
       return reply.code(200).send({
         status: "Success",
         ...result
+      });
+    }
+  );
+  app.post<{ Body: ChangePassword }>(
+    "/change-password",
+    {
+      schema: {
+        body: {
+          type: "object",
+          required: [
+            "email",
+            "password",
+          ],
+          properties: {
+
+            email: {
+              type: "string",
+            },
+            password: {
+              type: "string",
+              minLength: 6,
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: ChangePassword }>,
+      reply: FastifyReply
+    ) => {
+      const controller = new UserController();
+
+      const data = await controller.editUserPassword(request.body);
+
+      return reply.code(200).send({
+        status: "Success",
+        message: data,
+      });
+    }
+  );
+
+  // Verify User Before Password Change
+  app.post<{ Body: ChangePasswordUserRequestBody }>(
+    "/change-password/verify-user",
+    {
+      schema: {
+        body: {
+          type: "object",
+          required: [
+            "email",
+          ],
+          properties: {
+            email: {
+              type: "string",
+              format: "email",
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{
+        Body: ChangePasswordUserRequestBody;
+      }>,
+      reply: FastifyReply
+    ) => {
+      const controller = new UserController();
+
+      const data = await controller.changePasswordReq(
+        request.body
+      );
+
+      return reply.code(200).send({
+        status: "Success",
+        message: data,
+      });
+    }
+  );
+  app.post<{ Body: VerifyOTPPayload }>(
+    "/otp/verify",
+    {
+      schema: {
+        body: {
+          type: "object",
+          required: ["email", "otp"],
+          properties: {
+            email: {
+              type: "string",
+            },
+            otp: {
+              type: "string",
+              minLength: 6,
+              maxLength: 6,
+            },
+          },
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: VerifyOTPPayload }>,
+      reply: FastifyReply
+    ) => {
+      const data = await controller.verifyOtp(request.body);
+
+      return reply.code(200).send({
+        status: "Success",
+        message: "OTP verified successfully.",
+        data,
       });
     }
   );
