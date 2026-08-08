@@ -1,6 +1,7 @@
 import { transaction } from "../../config/db";
 import { validateActiveYearAndRole, validateUserRole } from "../../middleware/authCheck";
 import { AppError } from "../../utils/AppError";
+import { sendOTPEmail } from "../../utils/nodeMailer";
 import { OTPController } from "../otp/otp.controller";
 import UserService from "./user.service";
 import {
@@ -104,16 +105,18 @@ export default class UserController {
     return transaction(async (client) => {
       const user = await this.service.checkUserExist(data, client);
       const otpController = new OTPController()
-      await otpController.createOTP(user.id, client)
+      const generatedOtp = await otpController.createOTP(user.id, client)
+      console.log("generatedOtp==========",generatedOtp)
+      await sendOTPEmail(user.email, generatedOtp, user.name);
       return user;
     });
   }
   async verifyOtp(data: VerifyOTPPayload) {
-    const {email,otp}=data
+    const { email, otp } = data
     return transaction(async (client) => {
       const user = await this.service.checkUserExist({ email }, client);
       const otpController = new OTPController()
-      await otpController.verifyOTP(user.id,otp, client)
+      await otpController.verifyOTP(user.id, otp, client)
       return user;
     });
   }
